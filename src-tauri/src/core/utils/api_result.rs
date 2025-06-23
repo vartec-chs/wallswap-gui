@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::core::ErrorDetails;
+use crate::core::errors::ErrorDetails;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "answer")]

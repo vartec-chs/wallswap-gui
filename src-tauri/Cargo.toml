@@ -1,8 +1,8 @@
 [package]
 name = "wallswap-gui"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A GUI for Wallswap, a tool for managing wallpapers on Linux, macOS, and Windows."
+authors = ["Vartec"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -24,6 +24,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
 thiserror = "2"
+scraper = "0.23"
 rand = "0.9.1"
 url = "2.5"
 futures-util = "0.3"
@@ -39,3 +40,20 @@ tauri-plugin-http = { version = "2", features = [
 ] }
 tauri-plugin-os = "2"
 tauri-plugin-log = "2"
+log = "0.4"
+screen_size = "0.1.0"
+tauri-plugin-fs = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+	"Win32_Foundation",
+	"Win32_System_Registry",
+	"Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc = "0.2"
+cocoa = "0.26"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Для Linux поддержка через системные команды

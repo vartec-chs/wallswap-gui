@@ -1,6 +1,6 @@
 use crate::core::{
     api_result::{ApiError, ApiResult, ErrorCode},
-    AppErrors, NetworkError, OperationError,
+    errors::{AppErrors, NetworkError},
 };
 use tauri::{command, App, AppHandle, Manager, State};
 

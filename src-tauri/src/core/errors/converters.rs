@@ -1,10 +1,9 @@
 use crate::core::{
     errors::{
-        AppErrors, FileSystemError, GeneralError, NetworkError, NotFoundError, OperationError,
-        ParsingError, SystemError, ValidationError,
+        AppErrors, ErrorDetails, FileSystemError, GeneralError, NetworkError, NotFoundError,
+        OperationError, ParsingError, SystemError, ValidationError,
     },
     utils::api_result::{ApiError, ApiResult, ErrorCode},
-    ErrorDetails,
 };
 
 /// Конвертер из AppErrors в ApiError

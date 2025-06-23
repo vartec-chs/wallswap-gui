@@ -12,6 +12,7 @@
     "store:default",
     "http:default",
     "os:default",
-    "log:default"
+    "log:default",
+    "fs:default"
   ]
 }
