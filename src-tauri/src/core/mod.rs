@@ -1,4 +1,4 @@
-pub mod errors;
+pub mod api_result;
 mod fetcher;
 pub mod models;
 mod path;
@@ -7,5 +7,4 @@ mod types;
 mod utils;
 
 pub use fetcher::HttpFetcher;
-pub use utils::api_result;
 pub use utils::debug;

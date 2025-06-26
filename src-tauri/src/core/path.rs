@@ -3,7 +3,7 @@ use tauri::path::BaseDirectory::AppCache;
 use tauri::path::BaseDirectory::AppData;
 use tokio::fs;
 
-use crate::core::errors::{AppErrors, FileSystemError, Result};
+use crate::core::api_result::{AppErrors, FileSystemError, Result};
 use std::path::PathBuf;
 
 pub fn get_home_dir() -> Result<PathBuf> {
@@ -31,15 +31,15 @@ pub async fn get_cache_dir() -> Result<PathBuf> {
     Ok(wallswap_path)
 }
 pub async fn debug_dir() -> Result<PathBuf> {
-	let path = get_cache_dir().await?;
-	let wallswap_path = path.join("debug_output");
-	if !wallswap_path.exists() {
-		fs::create_dir_all(&wallswap_path)
-			.await
-			.map_err(|e| AppErrors::FileSystem(FileSystemError::IoError(e.to_string())))?;
-	}
-	log::info!("Директория отладки: {}", wallswap_path.display());
-	Ok(wallswap_path)
+    let path = get_cache_dir().await?;
+    let wallswap_path = path.join("debug_output");
+    if !wallswap_path.exists() {
+        fs::create_dir_all(&wallswap_path)
+            .await
+            .map_err(|e| AppErrors::FileSystem(FileSystemError::IoError(e.to_string())))?;
+    }
+    log::info!("Директория отладки: {}", wallswap_path.display());
+    Ok(wallswap_path)
 }
 
 pub async fn download_dir() -> Result<PathBuf> {

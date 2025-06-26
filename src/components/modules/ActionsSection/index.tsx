@@ -7,17 +7,17 @@ import { type FC } from 'react'
 export const ActionSection: FC = () => {
 	// Здесь можно добавить логику для обработки действий, если необходимо
 
-	// const { answer, loading, error, refetch } = useTest()
+	const { answer, loading, error, refetch } = useTest()
 
-	// console.log('testData', answer?.code)
+	console.log('testData', answer?.code)
 
-	// if (loading) {
-	// 	return <div>Загрузка...</div>
-	// }
+	if (loading) {
+		return <div>Загрузка...</div>
+	}
 
-	// if (error) {
-	// 	return <div>{error.message}</div>
-	// }
+	if (error) {
+		return <div>{error.message}</div>
+	}
 
 	return (
 		<div className='flex flex-col w-full  items-start justify-between gap-4 border p-2 rounded-lg shadow-lg bg-white dark:bg-neutral-900'>

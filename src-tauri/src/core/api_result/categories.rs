@@ -143,6 +143,18 @@ pub struct ErrorDetails {
     pub retryable: bool,
     pub nested_details: Option<serde_json::Value>,
 }
+ 
+// Добавляем поддержку для асинхронных команд Tauri
+// impl<T> tauri::async_runtime::A for crate::core::api_result::ApiResult<T>
+// where
+//     T: serde::Serialize + Send + 'static,
+// {
+//     type Output = Self;
+
+//     fn from_output(output: Self::Output) -> Self {
+//         output
+//     }
+// }
 
 // Конверторы из стандартных ошибок
 impl From<reqwest::Error> for NetworkError {

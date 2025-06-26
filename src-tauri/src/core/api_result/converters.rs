@@ -1,10 +1,9 @@
-use crate::core::{
-    errors::{
-        AppErrors, ErrorDetails, FileSystemError, GeneralError, NetworkError, NotFoundError,
-        OperationError, ParsingError, SystemError, ValidationError,
-    },
-    utils::api_result::{ApiError, ApiResult, ErrorCode},
+use crate::core::api_result::{
+    AppErrors, ErrorDetails, FileSystemError, GeneralError, NetworkError, NotFoundError,
+    OperationError, ParsingError, SystemError, ValidationError,
 };
+
+use super::{ApiError, ApiResult, ErrorCode};
 
 /// Конвертер из AppErrors в ApiError
 impl From<AppErrors> for ApiError {

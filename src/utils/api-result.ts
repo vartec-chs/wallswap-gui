@@ -83,6 +83,7 @@ export class Result<T> {
 		if (apiResult.type === 'success') {
 			return Result.success(apiResult.answer)
 		} else {
+			console.error('API Error:', apiResult.answer)
 			return Result.error(apiResult.answer)
 		}
 	}
@@ -155,6 +156,7 @@ export class TauriAPI {
 			return Result.fromApiResult(apiResult)
 		} catch (error) {
 			// Обработка ошибок от Tauri
+			console.error('Error invoking Tauri command:', error)
 			return Result.error({
 				code: 'INTERNAL_ERROR' as any,
 				message: error instanceof Error ? error.message : 'Unknown error',

@@ -1,6 +1,6 @@
 use crate::core::{
     debug::Debug,
-    errors::*,
+    api_result::*,
     models::{Category, ResolutionFilter},
     HttpFetcher,
 };

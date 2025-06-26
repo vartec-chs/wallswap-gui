@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::core::errors::{AppErrors, NetworkError, Result, ValidationError};
+use crate::core::api_result::{AppErrors, NetworkError, Result, ValidationError};
 use log;
 use tauri_plugin_http::reqwest::{header, Client, Request, Response};
 use tokio::time::sleep;
@@ -179,7 +179,7 @@ impl HttpFetcher {
         })?;
 
         std::fs::write(path, content).map_err(|e| {
-            AppErrors::FileSystem(crate::core::errors::FileSystemError::IoError(e.to_string()))
+            AppErrors::FileSystem(crate::core::api_result::FileSystemError::IoError(e.to_string()))
         })?;
 
         Ok(())
@@ -199,7 +199,7 @@ impl HttpFetcher {
         })?;
 
         serde_json::from_str(&text).map_err(|e| {
-            AppErrors::Parsing(crate::core::errors::ParsingError::JsonError(e.to_string()))
+            AppErrors::Parsing(crate::core::api_result::ParsingError::JsonError(e.to_string()))
         })
     }
 

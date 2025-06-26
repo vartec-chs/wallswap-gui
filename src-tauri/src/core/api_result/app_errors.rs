@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::core::errors::*;
+use super::*;
 
 /// Основной enum для всех ошибок приложения
 #[derive(Error, Debug, Clone)]
@@ -72,8 +72,8 @@ impl AppErrors {
     }
 
     /// Преобразует в ApiResult
-    pub fn into_api_result<T>(self) -> crate::core::utils::api_result::ApiResult<T> {
-        crate::core::utils::api_result::ApiResult::Error(self.into())
+    pub fn into_api_result<T>(self) -> super::ApiResult<T> {
+        super::ApiResult::Error(self.into())
     }
 }
 
