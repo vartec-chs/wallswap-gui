@@ -1,90 +1,53 @@
 import { invoke } from '@tauri-apps/api/core'
+import { error } from 'console'
 
-export type ApiResult<T> =
-	| { type: 'success'; answer: ApiSuccess<T> }
-	| { type: 'error'; answer: ApiError }
+export type AppResult<T> = { Ok: AppSuccess<T> } | { Err: AppError }
 
-// "category": "general",
-//           "error_type": "other",
-//           "message": "Test error",
-//           "retryable": false
+export type AppSuccess<T> = {
+	code?: string
+	message?: string
+	data?: T
+	timestamp?: string // ISO 8601 format
+	execution_time_ms?: number
+	metadata?: Record<string, any>
+}
 
 export type ErrorDetails = {
 	category: string
 	error_type: string
+	severity: string
 	retryable?: boolean
-	[key: string]: any
-}
-
-export interface ApiError {
-	code: ErrorCode
 	message: string
-	details?: ErrorDetails
+	full_message?: string
+	timestamp?: string // ISO 8601 format
+	trace_id?: string
+	nested_details?: Record<string, any>
 }
 
-export interface ApiSuccess<T> {
-	code: SuccessCode
-	data: T
-}
-
-export enum SuccessCode {
-	OPERATION_SUCCESSFUL = 'OPERATION_SUCCESSFUL',
-	DATA_RETRIEVED = 'DATA_RETRIEVED',
-	USER_CREATED = 'USER_CREATED',
-	USER_UPDATED = 'USER_UPDATED',
-	USER_DELETED = 'USER_DELETED',
-	FILE_UPLOADED = 'FILE_UPLOADED',
-}
-
-export enum ErrorCode {
-	// Общие ошибки
-	INTERNAL_ERROR = 'INTERNAL_ERROR',
-	INVALID_INPUT = 'INVALID_INPUT',
-	NOT_FOUND = 'NOT_FOUND',
-	UNAUTHORIZED = 'UNAUTHORIZED',
-	FORBIDDEN = 'FORBIDDEN',
-
-	// Пользовательские ошибки
-	USER_NOT_FOUND = 'USER_NOT_FOUND',
-	USER_ALREADY_EXISTS = 'USER_ALREADY_EXISTS',
-	INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
-
-	// Файловые ошибки
-	FILE_NOT_FOUND = 'FILE_NOT_FOUND',
-	FILE_ACCESS_DENIED = 'FILE_ACCESS_DENIED',
-	FILE_CORRUPTED = 'FILE_CORRUPTED',
-
-	// Сетевые ошибки
-	NETWORK_ERROR = 'NETWORK_ERROR',
-	TIMEOUT = 'TIMEOUT',
-
-	// Бизнес-логика
-	VALIDATION_FAILED = 'VALIDATION_FAILED',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
+export type AppError = ErrorDetails
 
 // utils/result.ts
 export class Result<T> {
 	private constructor(
 		private readonly isSuccess: boolean,
-		private readonly value?: ApiSuccess<T>,
-		private readonly error?: ApiError,
+		private readonly value?: AppSuccess<T>,
+		private readonly error?: AppError,
 	) {}
 
-	static success<T>(data: ApiSuccess<T>): Result<T> {
+	static success<T>(data: AppSuccess<T>): Result<T> {
 		return new Result<T>(true, data)
 	}
 
-	static error<T>(error: ApiError): Result<T> {
+	static error<T>(error: AppError): Result<T> {
 		return new Result<T>(false, undefined, error)
 	}
 
-	static fromApiResult<T>(apiResult: ApiResult<T>): Result<T> {
-		if (apiResult.type === 'success') {
-			return Result.success(apiResult.answer)
+	static fromAppResult<T>(appResult: AppResult<T>): Result<T> {
+		if ('Ok' in appResult) {
+			return Result.success(appResult.Ok)
 		} else {
-			console.error('API Error:', apiResult.answer)
-			return Result.error(apiResult.answer)
+			console.error('App Error:', appResult.Err)
+			return Result.error(appResult.Err)
 		}
 	}
 
@@ -96,22 +59,22 @@ export class Result<T> {
 		return !this.isSuccess
 	}
 
-	unwrap(): ApiSuccess<T> {
+	unwrap(): AppSuccess<T> {
 		if (!this.isSuccess) {
 			throw new Error(`Called unwrap on error: ${this.error?.message}`)
 		}
 		return this.value!
 	}
 
-	unwrapOr(defaultValue: ApiSuccess<T>): ApiSuccess<T> {
+	unwrapOr(defaultValue: AppSuccess<T>): AppSuccess<T> {
 		return this.isSuccess ? this.value! : defaultValue
 	}
 
-	unwrapOrElse(fn: (error: ApiError) => ApiSuccess<T>): ApiSuccess<T> {
+	unwrapOrElse(fn: (error: AppError) => AppSuccess<T>): AppSuccess<T> {
 		return this.isSuccess ? this.value! : fn(this.error!)
 	}
 
-	map<U>(fn: (value: ApiSuccess<T>) => ApiSuccess<U>): Result<U> {
+	map<U>(fn: (value: AppSuccess<T>) => AppSuccess<U>): Result<U> {
 		if (this.isSuccess) {
 			return Result.success(fn(this.value!))
 		} else {
@@ -119,7 +82,7 @@ export class Result<T> {
 		}
 	}
 
-	mapErr(fn: (error: ApiError) => ApiError): Result<T> {
+	mapErr(fn: (error: AppError) => AppError): Result<T> {
 		if (this.isSuccess) {
 			return new Result<T>(true, this.value!)
 		} else {
@@ -127,7 +90,7 @@ export class Result<T> {
 		}
 	}
 
-	andThen<U>(fn: (value: ApiSuccess<T>) => Result<U>): Result<U> {
+	andThen<U>(fn: (value: AppSuccess<T>) => Result<U>): Result<U> {
 		if (this.isSuccess) {
 			return fn(this.value!)
 		} else {
@@ -135,7 +98,7 @@ export class Result<T> {
 		}
 	}
 
-	match<U>(onSuccess: (value: ApiSuccess<T>) => U, onError: (error: ApiError) => U): U {
+	match<U>(onSuccess: (value: AppSuccess<T>) => U, onError: (error: AppError) => U): U {
 		if (this.isSuccess) {
 			return onSuccess(this.value!)
 		} else {
@@ -143,7 +106,7 @@ export class Result<T> {
 		}
 	}
 
-	getError(): ApiError | undefined {
+	getError(): AppError | undefined {
 		return this.error
 	}
 }
@@ -151,16 +114,11 @@ export class Result<T> {
 export class TauriAPI {
 	static async execCommand<T>(command: string, args?: Record<string, any>): Promise<Result<T>> {
 		try {
-			const apiResult = await invoke<ApiResult<T>>(command, args)
-			console.log('API Result:', apiResult)
-			return Result.fromApiResult(apiResult)
-		} catch (error) {
-			// Обработка ошибок от Tauri
-			console.error('Error invoking Tauri command:', error)
-			return Result.error({
-				code: 'INTERNAL_ERROR' as any,
-				message: error instanceof Error ? error.message : 'Unknown error',
-			})
+			const appResult = await invoke<AppResult<T>>(command, args)
+			console.log('App Result:', appResult)
+			return Result.fromAppResult(appResult)
+		} catch (error: any) {
+			return Result.error(error as AppError)
 		}
 	}
 }

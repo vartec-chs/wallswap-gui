@@ -2,20 +2,20 @@
 
 pub mod commands;
 pub mod core;
-pub mod states;
-pub mod wallpaper_delivery_modules;
+// pub mod states;
+// pub mod wallpaper_delivery_modules;
 
 // use core::
 
-use commands::test;
-use states::{FilterState, MainState};
+use commands::test_commands;
+// use states::{FilterState, MainState};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
-        .manage(MainState::default())
-        .manage(FilterState::default())
+        // .manage(MainState::default())
+        // .manage(FilterState::default())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .target(tauri_plugin_log::Target::new(
@@ -42,7 +42,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![test::test_command])
+        .invoke_handler(tauri::generate_handler![
+			test_commands::test_command,
+			// Add other commands here
+		])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
